@@ -11,6 +11,7 @@ client = OpenAI(
 # Initialize discord bot
 bot = commands.Bot()
 TESTING_GUILD_ID = 1318201343382388837
+BOT_ID = 1318202831131381760
 
 @bot.event
 async def on_ready():
@@ -23,13 +24,14 @@ async def model(interaction: nextcord.Interaction):
 # when message recived
 @bot.event
 async def on_message(message):
-    print(f'Message from {message.author}: {message.content}')
-    if message.content != "":
-        print("not empty")
-        a = llm_message(f"{message.author}: {message.content}")
-        await message.reply(a)
-    else:
-        print("message empty, doing nothing")
+    print(f'Message from {message.author}({message.author.id}): {message.content}')
+    if message.author.id != BOT_ID:
+        if message.content != "":
+            print("not empty")
+            a = llm_message(f'{message.author} said \"{message.content}"\"')
+            await message.reply(a)
+        else:
+            print("message empty, doing nothing")
 
 # discord token stuff
 with open("secret.env", 'r') as env_file:
