@@ -12,7 +12,7 @@ bot = commands.Bot()
 
 @bot.event
 async def on_ready():
-    print(f'We have logged in as {bot.user}')
+    print(f'Logged in as {bot.user}...')
 
 @bot.slash_command(description="to know what model is being used", guild_ids=[TESTING_GUILD_ID])
 async def model(interaction: nextcord.Interaction):
