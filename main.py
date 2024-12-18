@@ -3,6 +3,7 @@ from nextcord.ext import commands
 import nextcord
 
 # Initialize LM Studio
+conversation_history = []
 client = OpenAI(
     base_url="http://localhost:1234/v1",
     api_key="lm-studio"  # LM Studio doesn't require an actual API key
@@ -21,14 +22,15 @@ async def on_ready():
 async def model(interaction: nextcord.Interaction):
     await interaction.send("idk")
 
-# when message recived
+# when message received
 @bot.event
 async def on_message(message):
     print(f'Message from {message.author}({message.author.id}): {message.content}')
     if message.author.id != BOT_ID:
         if message.content != "":
             print("not empty")
-            a = llm_message(f'{message.author} said \"{message.content}"\"')
+            conversation_history.append({"role": "user", "content": message.content})
+            a = llm_message()
             await message.reply(a)
         else:
             print("message empty, doing nothing")
@@ -39,25 +41,31 @@ with open("secret.env", 'r') as env_file:
     KEY_DISCORD = env_data[0].strip()
 
 # lm-studio function
-def llm_message(user_input):
+def llm_message():
+    global conversation_history
+    
     model_identifier = "your-model-identifier"     
 
     try:
         completion = client.chat.completions.create(
             model=model_identifier,
-            messages=[
-                {"role": "user", "content": user_input}
-            ],
+            messages=conversation_history,
             temperature=0.7  # Adjust creativity of responses
         )
 
-        # Print the model's response
         response = completion.choices[0].message.content
         print(f"LM Studio: {response}")
-        return(response)
+        
+        # Add bot's message to history
+        conversation_history.append({"role": "assistant", "content": response})
+        
+        # 10 message max
+        if len(conversation_history) > 10:  # Example: keep last 10 interactions
+            conversation_history = conversation_history[-10:]
+        return response
     except Exception as e:
         print(f"An error occurred: {e}")
-        return(f"An error occurred: {e}")
+        return f"An error occurred: {e}"
 
 # thign that do stuff
 if __name__ == "__main__":
