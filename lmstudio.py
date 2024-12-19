@@ -6,6 +6,8 @@ client = OpenAI(
     api_key="lm-studio"  # LM Studio doesn't require an actual API key
 )
 
+print([model.id for model in client.models.list().data])
+
 def chat_with_lm_studio():
     model_identifier = "your-model-identifier"     
 

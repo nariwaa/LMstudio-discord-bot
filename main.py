@@ -2,6 +2,8 @@ from openai import OpenAI
 from nextcord.ext import commands
 import nextcord
 
+print("starting...")
+
 # Initialize LM Studio
 conversation_history = []
 client = OpenAI(
@@ -18,9 +20,11 @@ BOT_ID = 1318202831131381760
 async def on_ready():
     print(f'Logged in as {bot.user}')
 
-@bot.slash_command(description="to know what model is being used", guild_ids=[TESTING_GUILD_ID])
+@bot.slash_command(description="list every installed models", guild_ids=[TESTING_GUILD_ID])
 async def model(interaction: nextcord.Interaction):
-    await interaction.send("idk")
+    modellist = [model.id for model in client.models.list().data]
+    print(modellist)
+    await interaction.send(modellist)
 
 # when message received
 @bot.event
