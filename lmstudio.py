@@ -1,40 +1,48 @@
 from openai import OpenAI
 
-# Initialize the client to point to LM Studio
 client = OpenAI(
-    base_url="http://localhost:1234/v1",
-    api_key="lm-studio"  # LM Studio doesn't require an actual API key
+    base_url="http://127.0.0.1:1434/v1/",
+    api_key="whatever" # not needed
 )
 
-print([model.id for model in client.models.list().data])
+def main(pre_prompt="", user_name="user", ai_name="assistant", memory_limit=20):
+    model_identifier = "llama3.2"     
+    conversation_history = []
 
-def chat_with_lm_studio():
-    model_identifier = "your-model-identifier"     
-
-    print("Welcome to the LM Studio Chatbot!")
+    print(f"Welcome to the {ai_name} Chatbot!")
     print("Type 'exit' to end the conversation.")
 
+    if pre_prompt:
+        conversation_history.append({"role": "system", "content": pre_prompt})
+
     while True:
-        user_input = input("You: ")
+        user_input = input(f"{user_name}: ")
         if user_input.lower() == 'exit':
             print("Goodbye!")
             break
 
+        conversation_history.append({"role": "user", "content": user_input})
+
+        if len(conversation_history) > memory_limit:
+            conversation_history = conversation_history[-memory_limit:]
+
         try:
-            # Send the user's message to the model
             completion = client.chat.completions.create(
                 model=model_identifier,
-                messages=[
-                    {"role": "user", "content": user_input}
-                ],
-                temperature=0.7  # Adjust creativity of responses
+                messages=conversation_history,
+                temperature=0.7
             )
 
-            # Print the model's response
             response = completion.choices[0].message.content
-            print(f"LM Studio: {response}")
+            conversation_history.append({"role": "assistant", "content": response})
+            print(f"{ai_name}: {response}")
         except Exception as e:
             print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    chat_with_lm_studio()
+    main(
+        pre_prompt="You are an assistant",
+        user_name="user",
+        ai_name="assistant",
+        memory_limit=20
+    )
